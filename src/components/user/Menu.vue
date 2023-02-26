@@ -39,14 +39,17 @@
       <el-table-column
           align="center"
           prop="icon"
-          label="图标">
-        <i :class="icon"></i>
+          label="图标"
+     >
+       <template slot-scope="row">
+         <i class="row.icon"></i>
+       </template>
       </el-table-column>
-      <el-table-column
-          align="center"
-          prop="sex"
-          label="类别">
-      </el-table-column>
+<!--      <el-table-column-->
+<!--          align="center"-->
+<!--          prop="sex"-->
+<!--          label="类别">-->
+<!--      </el-table-column>-->
 <!--      <el-table-column-->
 <!--          align="center"-->
 <!--          prop="linkurl"-->
@@ -169,7 +172,7 @@ export default {
     return {
 
       //图片地址
-      icon:'',
+
       tableData2:[],
       //标签复选框
       num:'',
@@ -299,7 +302,6 @@ export default {
           })
           .then((res)=> {
                 this.tableData = res.data.data;
-                this.icon = res.data.data.icon;
               }
           )
           .catch(function (error){

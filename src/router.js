@@ -32,7 +32,7 @@ export default [{
               component:UserGroup
             },
             {
-              name: '用户管理',
+              name: '角色管理',
               path: 'userList',
               component: UserList
             },
@@ -82,7 +82,7 @@ export default [{
                 component:Jurisdiction
             },
             {
-                name: '角色管理',
+                name: '用户管理',
                 path: 'RoleList',
                 component:RoleList
             },

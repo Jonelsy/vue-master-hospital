@@ -77,13 +77,17 @@
         <el-form-item label="说明" prop="desc">
           <el-input type="textarea" v-model="ruleForm.desc" style="width: 300px"></el-input>
         </el-form-item>
+        <el-form-item label="选项" prop="ids" >
+          <el-checkbox-group v-model="ids" style="width: 350px">
+            <el-checkbox :label="item.id" v-for="item in tableData2" :key="item.id"  name="type">{{item.name}}</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
     <el-button @click="resetForm('ruleForm')">取 消</el-button>
     <el-button type="primary" @click="addCheckItems('ruleForm')" v-if="this.title=='新增检查项'">新 增</el-button>
     <el-button type="primary" @click="changeCheckItems('ruleForm')" v-if="this.title=='编辑检查项'"> 编 辑</el-button>
   </span>
-
     </el-dialog>
     <!--    分页-->
     <div class="block">
@@ -114,6 +118,7 @@ export default {
   data() {
     return {
       title:'',
+      ids:[],
       //分页
       page:1,
       pageSize:10,
@@ -143,12 +148,14 @@ export default {
           {required: true, message: '请输入角色姓名', trigger: 'blur'},
         ],
         desc:[],
-        desc2:[],
+
       },
       dialogVisible: false,
       input:'',
       loading: false,
       tableData: [
+      ],
+      tableData2: [
       ]
     }
   },
@@ -162,19 +169,17 @@ export default {
     opendialog2(row){
       this.dialogVisible=true;
       this.title = '编辑检查项';
-      this.ruleForm.id=row.id;
-      this.ruleForm.code=row.code;
+      this.ruleForm.code=row.keyword;
       this.ruleForm.name=row.name;
-      this.ruleForm.sex=row.sex;
-      this.ruleForm.age=row.age;
-      this.ruleForm.leixing=row.type;
-      this.ruleForm.money=row.price;
-      this.ruleForm.desc=row.remark;
-      this.ruleForm.desc2=row.attention;
+      this.ruleForm.desc = row.description
+      this.ids=row.permissionIds;
+      // console.log(this.ids)
     },
     //校验规则
     resetForm(formName) {
       this.$refs[formName].resetFields();
+      this.ids = [];
+      this.ids2 = [];
       this.dialogVisible = false
     },
     //获取全部数据
@@ -190,6 +195,18 @@ export default {
           .then((res)=> {
                 this.tableData = res.data.data.records;
                 this.total = res.data.data.total;
+              }
+          )
+          .catch(function (error){
+            console.log(error.response);
+          })
+    },
+    //获取下拉数据
+    async getSecondItems(){
+      await this.$axios
+          .get("/permission/permissionList",)
+          .then((res)=> {
+                this.tableData2 = res.data.data;
               }
           )
           .catch(function (error){
@@ -235,9 +252,9 @@ export default {
           this.dialogVisible = false;
           this.loading=true;
           this.$axios
-              .post("/tcheckitem/save",{
+              .post("/role/save",{
                 keyword: this.ruleForm.code,
-                rolePermissionIds: [],
+                rolePermissionIds: this.ids,
                 description: this.ruleForm.desc,
                 name:this.ruleForm.name,
               })
@@ -346,6 +363,7 @@ export default {
   },
   created() {
     this.getCheckItems();
+    this.getSecondItems();
   }
 }
 </script>

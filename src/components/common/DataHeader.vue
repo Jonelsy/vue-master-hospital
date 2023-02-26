@@ -1,6 +1,6 @@
 <template>
 <div class="header-wraper">
-    <el-menu  default-active="1" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+    <el-menu  default-active="1" class="el-menu-demo" mode="horizontal" >
 
         <li class="title">
             <i class="el-icon-menu"></i>
