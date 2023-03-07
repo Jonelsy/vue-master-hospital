@@ -34,12 +34,6 @@
       </el-table-column>
       <el-table-column
           align="center"
-          prop="password"
-          label="密码"
-          width="180">
-      </el-table-column>
-      <el-table-column
-          align="center"
           prop="telephone"
           label="电话号码">
       </el-table-column>
@@ -69,7 +63,7 @@
             <el-button
                 type="warning" plain
                 size="small"
-                @click="opendialog3(scope.row)">修改密码
+                @click="opendialog3(scope.row)">重置密码
             </el-button>
             <el-button
                 type="warning" plain
@@ -100,7 +94,7 @@
         <el-form-item label="用户名" prop="username">
           <el-input v-model="ruleForm.username" style="width: 300px"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
+        <el-form-item label="密码" prop="password" v-if="this.title=='新增用户'">
           <el-input v-model="ruleForm.password" style="width: 300px" type="password"></el-input>
         </el-form-item>
         <el-form-item label="电话号" prop="telephone">
@@ -139,6 +133,26 @@
     <el-button type="primary" @click="changeCheckItems('ruleForm')" v-if="this.title=='编辑用户'"> 编 辑</el-button>
   </span>
     </el-dialog>
+
+    <el-dialog
+        title="分配角色"
+        :visible.sync="dialogVisible2"
+        width="500px"
+        @close="resetForm('ruleForm')"
+    >
+      <!--内容-->
+      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm" label-position="right" :inline="true">
+        <el-form-item label="选项" prop="ids" >
+          <el-select v-model="ruleForm.ids" placeholder="请选择" style="width: 150px">
+            <el-option :label="item.name" :value="item.id" v-for="item in tableData2"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="resetForm('ruleForm')">取 消</el-button>
+    <el-button type="primary" @click="allotCheckItems('ruleForm')">分 配</el-button>
+  </span>
+    </el-dialog>
     <!--    分页-->
     <div class="block">
       <el-pagination
@@ -171,6 +185,7 @@ export default {
     return {
       title: '',
       ids: [],
+      userId:'',
       //分页
       page: 1,
       pageSize: 10,
@@ -178,6 +193,7 @@ export default {
       name: null,
       birthday: '',
       ruleForm: {
+        ids:'',
         birthday: "",
         gender: "",
         password: "",
@@ -206,9 +222,13 @@ export default {
         remark: [
           {required: true, message: '请填写说明', trigger: 'change'}
         ],
+        ids: [
+          {required: true, message: '请选择', trigger: 'change'}
+        ],
 
       },
       dialogVisible: false,
+      dialogVisible2:false,
       input: '',
       loading: false,
       tableData: [],
@@ -232,31 +252,28 @@ export default {
       this.ruleForm.telephone = row.telephone;
       this.ruleForm.username = row.username;
     },
-    //修改密码
-    opendialog3(row) {
-      this.dialogVisible = true;
-      this.title = '';
-      this.ruleForm.code = row.keyword;
-      this.ruleForm.name = row.name;
-      this.ruleForm.desc = row.description
-      this.ids = row.permissionIds;
-      // console.log(this.ids)
+    //重置密码
+   async opendialog3(row) {
+      let ids = row.id
+      await this.$axios.get('/user/rePass?id='+ids)
+          .then((res)=>{
+            this.$notify({
+              title: '成功',
+              message: '重置密码成功',
+              type: 'success'
+            });
+          })
+
     },
     //分配角色
     opendialog4(row) {
-      this.dialogVisible = true;
-      this.title = '编辑检查项';
-      this.ruleForm.code = row.keyword;
-      this.ruleForm.name = row.name;
-      this.ruleForm.desc = row.description
-      this.ids = row.permissionIds;
+      this.dialogVisible2 = true;
+      this.userId = row.id;
       // console.log(this.ids)
     },
     //校验规则
     resetForm(formName) {
       this.$refs[formName].resetFields();
-      this.ids = [];
-      this.ids2 = [];
       this.dialogVisible = false
     },
     //获取全部数据
@@ -273,6 +290,7 @@ export default {
                 this.tableData = res.data.data;
                 this.total = res.data.data.total;
                 this.tableData.forEach((item, index, array) => {
+                  item.birthday = this.$formatDate(new Date(item.birthday), 'yyyy-MM-dd')
                   if (item.gender == 1) {
                     item.gender = '男'
                   } else if (item.gender == 2) {
@@ -285,18 +303,18 @@ export default {
             console.log(error.response);
           })
     },
-    // //获取下拉数据
-    // async getSecondItems(){
-    //   await this.$axios
-    //       .get("/permission/permissionList",)
-    //       .then((res)=> {
-    //             this.tableData2 = res.data.data;
-    //           }
-    //       )
-    //       .catch(function (error){
-    //         console.log(error.response);
-    //       })
-    // },
+    //获取分配数据
+    async getSecondItems(){
+      await this.$axios
+          .get("/role/listRole",)
+          .then((res)=> {
+                this.tableData2 = res.data.data;
+              }
+          )
+          .catch(function (error){
+            console.log(error.response);
+          })
+    },
     //查询项目
     async selectCheckItems() {
       await this.$axios
@@ -373,8 +391,44 @@ export default {
         }
       })
     },
+    //分配角色
+    allotCheckItems(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.dialogVisible2 = false;
+          this.loading = true;
+          this.$axios
+              .get("/user/distributionRoleId?roleId="+this.ruleForm.ids+"&userId="+this.userId)
+              .then((res) => {
+                this.loading = false;
+                this.getCheckItems();
+                this.birthday = '',
+                    this.$notify({
+                      title: '成功',
+                      message: '分配成功',
+                      type: 'success'
+                    });
+              })
+              .catch(function (error) {
+                this.$notify({
+                  title: '失败',
+                  message: '分配失败',
+                  type: 'warning'
+                });
+              })
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '分配失败',
+            type: 'warning'
+          });
+          return false;
+        }
+      })
+    },
     //修改检查项
     async changeCheckItems(formName) {
+      this.birthday = this.$formatDate(new Date(this.ruleForm.birthday), 'yyyy-MM-dd')
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.dialogVisible = false;
@@ -414,6 +468,7 @@ export default {
           return false;
         }
       })
+      this.birthday='';
     },
 
     //删除检查项

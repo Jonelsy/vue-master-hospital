@@ -48,6 +48,10 @@
             <el-button
                 type="primary" plain
                 size="small"
+                @click="opendialog3(scope.row)">分配菜单</el-button>
+            <el-button
+                type="primary" plain
+                size="small"
                 @click="opendialog2(scope.row)">编辑</el-button>
             <el-button
                 size="small"
@@ -89,6 +93,26 @@
     <el-button type="primary" @click="changeCheckItems('ruleForm')" v-if="this.title=='编辑检查项'"> 编 辑</el-button>
   </span>
     </el-dialog>
+<!--分配菜单提示框-->
+    <el-dialog
+        title="分配菜单"
+        :visible.sync="dialogVisible2"
+        width="500px"
+        @close="resetForm('ruleForm')"
+    >
+      <!--内容-->
+      <el-form :model="ruleForm2" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm" label-position="right" :inline="true">
+        <el-form-item label="选项" prop="ids" >
+          <el-checkbox-group v-model="ids2" style="width: 350px">
+            <el-checkbox :label="item.id" v-for="item in tableData3" :key="item.id"  name="type">{{item.name}}</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="resetForm('ruleForm')">取 消</el-button>
+    <el-button type="primary" @click="allotCheckItems()">分 配</el-button>
+  </span>
+    </el-dialog>
     <!--    分页-->
     <div class="block">
       <el-pagination
@@ -119,6 +143,7 @@ export default {
     return {
       title:'',
       ids:[],
+      ids2:[],
       //分页
       page:1,
       pageSize:10,
@@ -131,13 +156,6 @@ export default {
       },
       ruleForm2:{
         id:'',
-        name:'',
-        sex:'',
-        age:'',
-        leixing:'',
-        money:'',
-        desc:'',
-        desc2:'',
       },
       rules: {
         name: [
@@ -151,12 +169,15 @@ export default {
 
       },
       dialogVisible: false,
+      dialogVisible2:false,
       input:'',
       loading: false,
       tableData: [
       ],
       tableData2: [
-      ]
+      ],
+      tableData3:[
+      ],
     }
   },
   methods:{
@@ -175,12 +196,22 @@ export default {
       this.ids=row.permissionIds;
       // console.log(this.ids)
     },
+    //分配角色对应菜单
+  async  opendialog3(row){
+      this.dialogVisible2=true;
+      this.ruleForm2.id = row.id
+      await this.$axios.get('/role/MenuIdsByRoleId?roleId='+row.id)
+          .then((res)=>{
+            this.ids2 = res.data.data;
+          })
+    },
     //校验规则
     resetForm(formName) {
       this.$refs[formName].resetFields();
       this.ids = [];
       this.ids2 = [];
-      this.dialogVisible = false
+      this.dialogVisible = false;
+      this.dialogVisible2 = false
     },
     //获取全部数据
     async getCheckItems(){
@@ -207,6 +238,18 @@ export default {
           .get("/permission/permissionList",)
           .then((res)=> {
                 this.tableData2 = res.data.data;
+              }
+          )
+          .catch(function (error){
+            console.log(error.response);
+          })
+    },
+    //获取菜单数据
+    async getThirdItems(){
+      await this.$axios
+          .get("/menu/getMenuList",)
+          .then((res)=> {
+                this.tableData3 = res.data.data;
               }
           )
           .catch(function (error){
@@ -328,6 +371,21 @@ export default {
         }
       })
     },
+    //修改角色对应菜单
+    async allotCheckItems(){
+        this.dialogVisible2=false;
+        this.loading=true;
+        this.$axios.get('/role/addMenuIdsByRoleId?menuIds='+this.ids2+'&roleId='+this.ruleForm2.id)
+            .then((res)=>{
+              this.loading=false;
+              this.getCheckItems();
+              this.$notify({
+                title: '成功',
+                message: '修改成功',
+                type: 'success'
+              });
+            })
+    },
     //删除检查项
     async  deleteCheckItems(row){
       let {data} = await this.$axios
@@ -364,6 +422,8 @@ export default {
   created() {
     this.getCheckItems();
     this.getSecondItems();
+    this.getThirdItems();
+
   }
 }
 </script>
