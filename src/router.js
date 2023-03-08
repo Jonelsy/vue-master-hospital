@@ -18,6 +18,9 @@ import Menu from "./components/user/Menu.vue";
 import RoleList from './components/user/RoleList.vue';
 import Jurisdiction from './components/user/Jurisdiction.vue';
 import UserList from './components/user/UserList.vue';
+
+//患者管理
+import SickItem from './components/SickPerson/SickItem.vue';
 export default [{
         path: '/index',
         component: App,
@@ -85,6 +88,11 @@ export default [{
                 name: '用户管理',
                 path: 'RoleList',
                 component:RoleList
+            },
+            {
+                name: '患者列表',
+                path: 'SickItem',
+                component:SickItem
             },
         ]
     },
