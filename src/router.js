@@ -30,7 +30,7 @@ export default [{
                 component: TestManagement
             },
             {
-              name: '用户分群管理',
+              name: '个人中心',
               path: 'userGroup',
               component:UserGroup
             },
@@ -90,7 +90,7 @@ export default [{
                 component:RoleList
             },
             {
-                name: '患者列表',
+                name: '会员档案',
                 path: 'SickItem',
                 component:SickItem
             },

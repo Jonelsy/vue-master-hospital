@@ -38,7 +38,7 @@
       <el-table-column
           align="center"
           prop="idcard"
-          label="id卡">
+          label="身份证号">
       </el-table-column>
       <el-table-column
           align="center"
@@ -114,7 +114,7 @@
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="ruleForm.email" style="width: 300px" type="email"></el-input>
         </el-form-item>
-        <el-form-item label="ID卡" prop="idcard">
+        <el-form-item label="身份证号" prop="idcard">
           <el-input v-model="ruleForm.idcard" style="width: 300px"></el-input>
         </el-form-item>
         <el-form-item label="说明" prop="remark">
@@ -170,7 +170,7 @@ export default {
         password: "",
         phonenumber: "",
         remark: "",
-        sex: ""
+        sex: "",
       },
       //校验规则
       rules: {
@@ -183,6 +183,10 @@ export default {
         phonenumber: [
           { required: true, message: '请输入电话', trigger: 'blur' },
           { min: 11, max: 11, message: '非法电话号', trigger: 'blur' }
+        ],
+        idcard: [
+          { required: true, message: '请输入身份证号', trigger: 'blur' },
+          { min: 18, max: 18, message: '非法身份证', trigger: 'blur' }
         ],
         email: [
           { required: true, message: '请输入邮箱', trigger: 'blur',type: 'email' },
@@ -214,7 +218,7 @@ export default {
     opendialog2(row){
       this.dialogVisible=true;
       this.title = '编辑患者';
-      this.ruleForm.birthday = row.birthday;
+      this.ruleForm.birthday = new Date(row.birthday);
       this.ruleForm.email = row.email;
       this.ruleForm.idcard = row.idcard;
       this.ruleForm.name = row.name;
@@ -344,13 +348,12 @@ export default {
           this.dialogVisible = false;
           this.loading = true;
           this.$axios.post('/member/update',{
-            birthday: this.ruleForm.birthday,
+            birthday: this.$formatDate(new Date(this.ruleForm.birthday ), 'yyyy-MM-dd'),
             email: this.ruleForm.email,
             filenumber: null,
             id: 0,
             idcard: this.ruleForm.idcard,
             name: this.ruleForm.name,
-            password: this.ruleForm.password,
             phonenumber: this.ruleForm.phonenumber,
             remark: this.ruleForm.remark,
             sex: this.ruleForm.sex,

@@ -13,6 +13,7 @@
     "element-ui": "^2.15.12",
     "qs": "^6.11.0",
     "vue": "^2.1.0",
+    "vue-prevent-browser-back": "^1.0.5",
     "vue-router": "^2.1.1"
   },
   "devDependencies": {

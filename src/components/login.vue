@@ -1,7 +1,7 @@
 <template>
   <el-row type="flex" class="row-bg" justify="center">
     <el-col :xl="6" :lg="7">
-      <h2>欢迎来到VueAdmin管理系统</h2>
+      <h2>欢迎来到医疗后台管理系统</h2>
     </el-col>
 
     <el-col :span="1">
@@ -10,16 +10,15 @@
     <el-col :xl="6" :lg="7">
       <el-form :model="loginForm" :rules="rules" ref="loginForm" label-width="80px">
         <el-form-item label="用户名" prop="username" style="width: 380px;">
-          <el-input v-model="loginForm.username"></el-input>
+          <el-input v-model="loginForm.username" @keyup.enter.native="submitForm('loginForm')"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password"  style="width: 380px;">
-          <el-input v-model="loginForm.password" type="password"></el-input>
+          <el-input v-model="loginForm.password" type="password" @keyup.enter.native="submitForm('loginForm')"></el-input>
         </el-form-item>
         <el-form-item label="验证码" prop="code"  style="width: 380px;">
-          <el-input v-model="loginForm.code"  style="width: 172px; float: left" maxlength="5"></el-input>
+          <el-input v-model="loginForm.code"  style="width: 172px; float: left" maxlength="5" @keyup.enter.native="submitForm('loginForm')"></el-input>
           <el-image :src="captchaImg" class="captchaImg" @click="getCaptcha"></el-image>
         </el-form-item>
-
         <el-form-item>
           <el-button type="primary" @click="submitForm('loginForm')">立即登录</el-button>
           <el-button @click="resetForm('loginForm')">重置</el-button>
@@ -27,7 +26,6 @@
       </el-form>
     </el-col>
   </el-row>
-
 </template>
 
 <script>
@@ -60,7 +58,6 @@ export default {
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
-
         if (valid) {
           this.$axios.post('http://43.143.189.51:9999/login?'+ qs.stringify(this.loginForm)).then(res => {
             console.log(res)
@@ -83,7 +80,6 @@ export default {
         this.loginForm.key = res.data.data.token
         this.captchaImg = res.data.data.captchaImg
         this.loginForm.code = ''
-
       })
     }
   },
