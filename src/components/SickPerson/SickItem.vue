@@ -350,7 +350,7 @@ export default {
           this.$axios.post('/member/update',{
             birthday: this.$formatDate(new Date(this.ruleForm.birthday ), 'yyyy-MM-dd'),
             email: this.ruleForm.email,
-            id: 0,
+            id: this.ruleForm.id,
             idcard: this.ruleForm.idcard,
             name: this.ruleForm.name,
             phonenumber: this.ruleForm.phonenumber,
